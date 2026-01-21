@@ -94,7 +94,7 @@ class Timer {
                 const subMin = Math.floor(this.subTimeLeft / 60);
                 const subSec = this.subTimeLeft % 60;
                 this.subTimerDisplay.textContent =
-                    `Reporter must engage within: ${String(subMin).padStart(2, "0")}:${String(subSec).padStart(2, "0")}`;
+                    `Opponent must engage Reporter within: ${String(subMin).padStart(2, "0")}:${String(subSec).padStart(2, "0")}`;
                 this.subTimerDisplay.classList.remove("expired");
             } else if (!this.subExpired && this.subTimeLeft <= 0) {
                 this.subExpired = true;
