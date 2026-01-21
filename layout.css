@@ -138,6 +138,19 @@ html {
     100% { color: #002a80; text-shadow: 0 0 10px rgba(0, 60, 120, 0.6); }
 }
 
+.sub-timer {
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
+    color: #1565C0;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.sub-timer.expired {
+    color: #c62828;
+    font-weight: 600;
+}
+
+
 .timer-footer {
     width: 100%;
     display: flex;
