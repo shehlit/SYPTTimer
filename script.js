@@ -67,9 +67,13 @@ class Timer {
     updateDisplay() {
         const minutes = Math.floor(this.timeLeft / 60);
         const seconds = this.timeLeft % 60;
-        this.timeDisplay.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-        const progressPercent = ((this.duration - this.timeLeft) / this.duration) * 100;
-        this.progress.style.width = `${progressPercent}%`;
+        this.timeDisplay.textContent =
+            `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    
+        const progressPercent = this.duration > 0
+            ? ((this.duration - this.timeLeft) / this.duration) * 100
+            : 0;
+        this.progress.style.width = `${Math.min(Math.max(progressPercent, 0), 100)}%`;
     }
 
     updateButtons(state) {
@@ -103,15 +107,17 @@ class Timer {
     }
 
     start() {
-        if(!this.interval && !this.isComplete) {
-            this.interval = setInterval(() => {
-                this.timeLeft--;
-                this.updateDisplay();
-                if(this.timeLeft <= 0) this.complete();
-            }, 1000);
-            this.isPaused = false;
-            this.updateButtons("running");
-        }
+        if (this.interval || this.isComplete) return;
+        this.interval = setInterval(() => {
+            if (this.timeLeft <= 0) {
+                this.complete();
+                return;
+            }
+            this.timeLeft--;
+            this.updateDisplay();
+        }, 1000);
+        this.isPaused = false;
+        this.updateButtons("running");
     }
 
     pause() {
@@ -123,7 +129,6 @@ class Timer {
         } else if (this.isPaused && !this.isComplete){
             this.start();
         }
-
     }
 
     reset() {
@@ -141,13 +146,15 @@ class Timer {
     }
 
     complete() {
+        if (this.isComplete) return;
+        this.isComplete = true;
         clearInterval(this.interval);
         this.interval = null;
-        this.isComplete = true;
+        this.timeLeft = 0;
         this.updateDisplay();
         this.updateButtons("complete");
         alarm.currentTime = 0;
-        alarm.play().catch(() => { });
+        alarm.play().catch(() => {});
     }
 }
 
@@ -182,6 +189,23 @@ document.getElementById("nextBtn").addEventListener("click", () => {
     if(currentIndex < timers.length - 1) {
         currentIndex++;
         updateCarousel();
+    }
+});
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") {
+        document.getElementById("prevBtn").click();
+    } else if (e.key === "ArrowRight") {
+        document.getElementById("nextBtn").click();
+    } else if (e.key === " ") { // space: start/pause current
+        e.preventDefault();
+        const t = timers[currentIndex];
+        if (!t) return;
+        if (t.interval) t.pause();
+        else t.start();
+    } else if (e.key === "r" || e.key === "R") {
+        const t = timers[currentIndex];
+        if (t) t.reset();
     }
 });
 
