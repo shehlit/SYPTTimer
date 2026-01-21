@@ -37,39 +37,69 @@ class Timer {
         // 5-minute engagement window only for Segment 5 (index 4)
         if (this.index === 4) {
             this.subDuration = 5 * 60;
-            this.subTimeLeft = this.subDuration;
+            this.subTimeLeft = false;
             this.subExpired = false;
+            this.subTimerDisplay = this.element.querySelector(".sub-timer");
+            this.engagedBtn = this.element.querySelector(".engagedBtn") || null;
         }
 
         this.updateDisplay();
         this.updateButtons("initial");
     }
 
+    markEngaged() {
+        if (this.index !== 4 || this.engaged) return;
+        this.engaged = true;
+        // hide sub-timer and button, main timer keeps running
+        if (this.subTimerDisplay) {
+            this.subTimerDisplay.textContent = "";
+            this.subTimerDisplay.style.display = "none";
+        }
+        if (this.engagedBtn) {
+            this.engagedBtn.style.display = "none";
+        }
+    }
+
+    
     createTimerElement() {
         const div = document.createElement("div");
         const durationMins = this.duration / 60;
         const minuteLabel = durationMins <= 1 ? "minute" : "minutes";
-
+    
+        const isDiscussionSegment = this.index === 4; // Segment 5
+    
         div.className = "timer-segment";
         div.innerHTML = `
-        <div class="segment-title">Segment ${this.index + 1}: ${this.description}</div>
-        <div class="segment-subtitle">${durationMins} ${minuteLabel}</div>
-        <div class="time">00:00</div>
-        <div class="sub-timer"></div>
-        <div class="progress-bar">
-            <div class="progress"></div>
-        </div>
-        <div class="controls">
-            <button class="startBtn">Start</button>
-            <button class="pauseBtn">Pause</button>
-            <button class="resetBtn">Reset</button>
-        </div>
+          <div class="segment-title">Segment ${this.index + 1}: ${this.description}</div>
+          <div class="segment-subtitle">${durationMins} ${minuteLabel}</div>
+          <div class="time">00:00</div>
+          <div class="sub-timer"></div>
+          ${isDiscussionSegment ? `
+            <div class="sub-timer-controls">
+              <button class="engagedBtn">Reporter has engaged</button>
+            </div>
+          ` : ``}
+          <div class="progress-bar">
+              <div class="progress"></div>
+          </div>
+          <div class="controls">
+              <button class="startBtn">Start</button>
+              <button class="pauseBtn">Pause</button>
+              <button class="resetBtn">Reset</button>
+          </div>
         `;
-
+    
+        // existing listeners...
         div.querySelector(".startBtn").addEventListener("click", () => this.start());
         div.querySelector(".pauseBtn").addEventListener("click", () => this.pause());
         div.querySelector(".resetBtn").addEventListener("click", () => this.reset());
-
+    
+        // handle "Reporter has engaged" button only for Segment 5
+        if (isDiscussionSegment) {
+            const engagedBtn = div.querySelector(".engagedBtn");
+            engagedBtn.addEventListener("click", () => this.markEngaged());
+        }
+    
         return div;
     }
 
@@ -89,19 +119,17 @@ class Timer {
         }
 
         // sub-timer: only for Segment 5
-        if (this.index === 4 && this.subTimerDisplay) {
+        if (this.index === 4 && this.subTimerDisplay && !this.engaged) {
             if (!this.subExpired && this.subTimeLeft > 0) {
                 const subMin = Math.floor(this.subTimeLeft / 60);
                 const subSec = this.subTimeLeft % 60;
                 this.subTimerDisplay.textContent =
                     `Opponent must engage Reporter within: ${String(subMin).padStart(2, "0")}:${String(subSec).padStart(2, "0")}`;
-                this.subTimerDisplay.classList.remove("expired");
             } else if (!this.subExpired && this.subTimeLeft <= 0) {
                 this.subExpired = true;
                 this.subTimeLeft = 0;
                 this.subTimerDisplay.textContent =
-                    "5-minute window over (Reporter should already be engaged)";
-                this.subTimerDisplay.classList.add("expired");
+                    "5-minute window over";
             }
         }
     }
@@ -147,7 +175,7 @@ class Timer {
             this.timeLeft--;
 
             // handle sub-timer countdown only for Segment 5
-            if (this.index === 4 && this.subTimeLeft > 0) {
+            if (this.index === 4 && !this.engaged && this.subTimeLeft > 0) {
                 this.subTimeLeft--;
             }
 
@@ -178,9 +206,13 @@ class Timer {
         if (this.index === 4) {
             this.subTimeLeft = this.subDuration;
             this.subExpired = false;
+            this.engaged = false;
             if (this.subTimerDisplay) {
                 this.subTimerDisplay.textContent = "";
-                this.subTimerDisplay.classList.remove("expired");
+                this.subTimerDisplay.style.display = "block";
+            }
+            if (this.engagedBtn) {
+                this.engagedBtn.style.display = "inline-block";
             }
         }
         
