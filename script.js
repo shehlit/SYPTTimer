@@ -70,10 +70,14 @@ class Timer {
         this.timeDisplay.textContent =
             `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
     
-        const progressPercent = this.duration > 0
-            ? ((this.duration - this.timeLeft) / this.duration) * 100
-            : 0;
-        this.progress.style.width = `${Math.min(Math.max(progressPercent, 0), 100)}%`;
+        const progressPercent = ((this.duration - this.timeLeft) / this.duration) * 100;
+        this.progress.style.width = `${progressPercent}%`;
+    
+        if (this.timeLeft > 0 && this.timeLeft <= 10) {
+            this.timeDisplay.classList.add("flash-warning");
+        } else {
+            this.timeDisplay.classList.remove("flash-warning");
+        }
     }
 
     updateButtons(state) {
@@ -143,6 +147,7 @@ class Timer {
         this.updateButtons("initial");
         alarm.pause();
         alarm.currentTime = 0;
+        this.timeDisplay.classList.remove("flash-warning");
     }
 
     complete() {
@@ -155,6 +160,7 @@ class Timer {
         this.updateButtons("complete");
         alarm.currentTime = 0;
         alarm.play().catch(() => {});
+        this.timeDisplay.classList.remove("flash-warning");
     }
 }
 
