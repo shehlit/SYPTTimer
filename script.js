@@ -37,9 +37,9 @@ class Timer {
         // 5-minute engagement window only for Segment 5 (index 4)
         if (this.index === 4) {
             this.subDuration = 5 * 60;
-            this.subTimeLeft = false;
+            this.subTimeLeft = this.subDuration;   // FIX: start with 300 s, not false
             this.subExpired = false;
-            this.subTimerDisplay = this.element.querySelector(".sub-timer");
+            this.engaged = false;                  // FIX: initialise engagement flag
             this.engagedBtn = this.element.querySelector(".engagedBtn") || null;
         }
 
@@ -60,14 +60,13 @@ class Timer {
         }
     }
 
-    
     createTimerElement() {
         const div = document.createElement("div");
         const durationMins = this.duration / 60;
         const minuteLabel = durationMins <= 1 ? "minute" : "minutes";
-    
+
         const isDiscussionSegment = this.index === 4; // Segment 5
-    
+
         div.className = "timer-segment";
         div.innerHTML = `
           <div class="segment-title">Segment ${this.index + 1}: ${this.description}</div>
@@ -88,18 +87,16 @@ class Timer {
               <button class="resetBtn">Reset</button>
           </div>
         `;
-    
-        // existing listeners...
+
         div.querySelector(".startBtn").addEventListener("click", () => this.start());
         div.querySelector(".pauseBtn").addEventListener("click", () => this.pause());
         div.querySelector(".resetBtn").addEventListener("click", () => this.reset());
-    
-        // handle "Reporter has engaged" button only for Segment 5
+
         if (isDiscussionSegment) {
             const engagedBtn = div.querySelector(".engagedBtn");
             engagedBtn.addEventListener("click", () => this.markEngaged());
         }
-    
+
         return div;
     }
 
@@ -108,10 +105,10 @@ class Timer {
         const seconds = this.timeLeft % 60;
         this.timeDisplay.textContent =
             `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-    
+
         const progressPercent = ((this.duration - this.timeLeft) / this.duration) * 100;
         this.progress.style.width = `${progressPercent}%`;
-    
+
         if (this.timeLeft > 0 && this.timeLeft <= 10) {
             this.timeDisplay.classList.add("flash-warning");
         } else {
@@ -124,16 +121,14 @@ class Timer {
                 const subMin = Math.floor(this.subTimeLeft / 60);
                 const subSec = this.subTimeLeft % 60;
                 this.subTimerDisplay.textContent =
-                    `Opponent must engage Reporter within: ${String(subMin).padStart(2, "0")}:${String(subSec).padStart(2, "0")}`;
+                    `Reporter must engage within: ${String(subMin).padStart(2, "0")}:${String(subSec).padStart(2, "0")}`;
             } else if (!this.subExpired && this.subTimeLeft <= 0) {
                 this.subExpired = true;
                 this.subTimeLeft = 0;
-                this.subTimerDisplay.textContent =
-                    "5-minute window over";
+                this.subTimerDisplay.textContent = "5-minute window over";
             }
         }
     }
-    
 
     updateButtons(state) {
         const show = (btn) => btn.style.display = 'inline-block';
@@ -186,12 +181,12 @@ class Timer {
     }
 
     pause() {
-        if(this.interval){
+        if (this.interval) {
             clearInterval(this.interval);
             this.interval = null;
             this.isPaused = true;
             this.updateButtons("paused");
-        } else if (this.isPaused && !this.isComplete){
+        } else if (this.isPaused && !this.isComplete) {
             this.start();
         }
     }
@@ -202,7 +197,7 @@ class Timer {
         this.timeLeft = this.duration;
         this.isPaused = false;
         this.isComplete = false;
-        
+
         if (this.index === 4) {
             this.subTimeLeft = this.subDuration;
             this.subExpired = false;
@@ -215,7 +210,7 @@ class Timer {
                 this.engagedBtn.style.display = "inline-block";
             }
         }
-        
+
         this.updateDisplay();
         this.progress.style.width = "0%";
         this.element.classList.remove("complete");
@@ -238,6 +233,7 @@ class Timer {
         this.timeDisplay.classList.remove("flash-warning");
     }
 }
+
 
 timers.forEach((timer, i) => {
     timer.element.style.animationDelay = `${i * 0.15}s`;
