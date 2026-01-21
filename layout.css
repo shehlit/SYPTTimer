@@ -128,6 +128,16 @@ html {
     justify-content: center;
 }
 
+.time.flash-warning {
+    animation: flash 1s step-end infinite;
+}
+
+@keyframes flash {
+    0%   { color: #002a80; text-shadow: 0 0 10px rgba(0, 60, 120, 0.6); }
+    50%  { color: #c62828; text-shadow: 0 0 18px rgba(198, 40, 40, 0.8); }
+    100% { color: #002a80; text-shadow: 0 0 10px rgba(0, 60, 120, 0.6); }
+}
+
 .timer-footer {
     width: 100%;
     display: flex;
@@ -221,15 +231,4 @@ html {
     .segment-subtitle {
         font-size: 1.1rem;
     }
-
-    .time.flash-warning {
-        animation: flash 1s step-end infinite;
-    }
-    
-    @keyframes flash {
-        0%   { color: #002a80; text-shadow: 0 0 10px rgba(0, 60, 120, 0.6); }
-        50%  { color: #c62828; text-shadow: 0 0 18px rgba(198, 40, 40, 0.8); }
-        100% { color: #002a80; text-shadow: 0 0 10px rgba(0, 60, 120, 0.6); }
-    }
-
 }
