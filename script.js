@@ -75,7 +75,7 @@ class Timer {
           <div class="sub-timer"></div>
           ${isDiscussionSegment ? `
             <div class="sub-timer-controls">
-              <button class="engagedBtn">Reporter has engaged</button>
+              <button class="engagedBtn">Opponent has engaged Reporter</button>
             </div>
           ` : ``}
           <div class="progress-bar">
