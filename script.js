@@ -125,7 +125,7 @@ class Timer {
             } else if (!this.subExpired && this.subTimeLeft <= 0) {
                 this.subExpired = true;
                 this.subTimeLeft = 0;
-                this.subTimerDisplay.textContent = "5-minute window over";
+                this.subTimerDisplay.textContent = "4-minute window over";
             }
         }
     }
